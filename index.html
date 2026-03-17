@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>C# vs Python — Sintaxis Comparada</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-card: #1c2333;
+      --bg-card-alt: #21283b;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      --accent-csharp: #68217a;
+      --accent-csharp-light: #9b4dca;
+      --accent-csharp-glow: rgba(155, 77, 202, 0.25);
+      --accent-python: #3776ab;
+      --accent-python-light: #4da6ff;
+      --accent-python-glow: rgba(77, 166, 255, 0.25);
+      --accent-green: #3fb950;
+      --accent-yellow: #d29922;
+      --accent-orange: #f0883e;
+      --accent-red: #f85149;
+      --accent-cyan: #58a6ff;
+      --border: rgba(139, 148, 158, 0.15);
+      --slide-transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      /* Syntax colors */
+      --syn-keyword: #ff7b72;
+      --syn-type: #79c0ff;
+      --syn-string: #a5d6ff;
+      --syn-comment: #8b949e;
+      --syn-func: #d2a8ff;
+      --syn-number: #79c0ff;
+      --syn-class: #ffa657;
+      --syn-param: #e6edf3;
+      --syn-py-keyword: #ff7b72;
+      --syn-py-builtin: #79c0ff;
+      --syn-py-string: #a5d6ff;
+      --syn-py-func: #d2a8ff;
+      --syn-py-decorator: #ffa657;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
+      height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* === PROGRESS BAR === */
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent-csharp-light), var(--accent-python-light));
+      transition: width 0.4s; z-index: 100;
+    }
+
+    /* === SLIDER === */
+    .slider { display: flex; height: 100vh; transition: transform var(--slide-transition); }
+    .slide {
+      min-width: 100vw; height: 100vh;
+      padding: 50px 80px;
+      display: flex; flex-direction: column; justify-content: center;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+      position: relative;
+    }
+    .slide::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 28px 28px; pointer-events: none; z-index: 0;
+    }
+    .slide > * { position: relative; z-index: 1; }
+
+    /* === NAV === */
+    .nav-arrow {
+      position: fixed; top: 50%; transform: translateY(-50%); z-index: 50;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-primary); width: 48px; height: 48px; border-radius: 50%;
+      cursor: pointer; font-size: 20px; backdrop-filter: blur(12px);
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+    }
+    .nav-arrow:hover { background: rgba(255,255,255,0.15); border-color: var(--accent-cyan); }
+    .nav-prev { left: 20px; }
+    .nav-next { right: 20px; }
+
+    /* === DOTS === */
+    .dots { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 50; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); cursor: pointer; transition: all 0.3s; }
+    .dot.active { background: var(--accent-cyan); transform: scale(1.4); box-shadow: 0 0 8px rgba(88,166,255,0.4); }
+    .page-number { position: fixed; bottom: 24px; right: 32px; font-size: 13px; opacity: 0.4; z-index: 50; font-family: 'JetBrains Mono', monospace; }
+
+    /* === ANIMATIONS === */
+    .slide-content { opacity: 0; transform: translateY(24px); transition: all 0.6s ease-out; }
+    .slide.active .slide-content { opacity: 1; transform: translateY(0); }
+    .slide.active .slide-content:nth-child(2) { transition-delay: 0.08s; }
+    .slide.active .slide-content:nth-child(3) { transition-delay: 0.16s; }
+    .slide.active .slide-content:nth-child(4) { transition-delay: 0.24s; }
+    .slide.active .slide-content:nth-child(5) { transition-delay: 0.32s; }
+    .slide.active .slide-content:nth-child(6) { transition-delay: 0.40s; }
+
+    /* === BADGES === */
+    .badge {
+      display: inline-block; padding: 4px 14px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .badge-csharp { background: var(--accent-csharp-glow); color: var(--accent-csharp-light); border: 1px solid rgba(155,77,202,0.3); }
+    .badge-python { background: var(--accent-python-glow); color: var(--accent-python-light); border: 1px solid rgba(77,166,255,0.3); }
+    .badge-section {
+      background: rgba(88,166,255,0.08); color: var(--accent-cyan);
+      border: 1px solid rgba(88,166,255,0.2);
+    }
+    .badge-green { background: rgba(63,185,80,0.1); color: var(--accent-green); border: 1px solid rgba(63,185,80,0.2); }
+
+    /* === TITLES === */
+    .slide-title {
+      font-size: clamp(28px, 3.5vw, 44px); font-weight: 800;
+      line-height: 1.15; margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .slide-subtitle { font-size: 17px; color: var(--text-secondary); line-height: 1.6; max-width: 700px; margin-bottom: 28px; }
+
+    /* === CODE BLOCKS === */
+    .code-compare {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+      margin-top: 16px;
+    }
+    .code-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .code-panel-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+    .code-panel.csharp .code-panel-header {
+      background: linear-gradient(90deg, rgba(104,33,122,0.2), transparent);
+      color: var(--accent-csharp-light);
+    }
+    .code-panel.python .code-panel-header {
+      background: linear-gradient(90deg, rgba(55,118,171,0.2), transparent);
+      color: var(--accent-python-light);
+    }
+    .code-panel-header .lang-icon {
+      width: 20px; height: 20px; border-radius: 4px; display: flex;
+      align-items: center; justify-content: center; font-size: 11px; font-weight: 800;
+    }
+    .csharp .lang-icon { background: var(--accent-csharp); color: #fff; }
+    .python .lang-icon { background: var(--accent-python); color: #fff; }
+
+    pre {
+      margin: 0; padding: 16px 20px; font-family: 'JetBrains Mono', monospace;
+      font-size: 13.5px; line-height: 1.7; overflow-x: auto;
+      background: transparent; color: var(--text-primary);
+    }
+    pre code { background: none; }
+
+    /* Syntax classes */
+    .kw { color: var(--syn-keyword); font-weight: 500; }
+    .tp { color: var(--syn-type); }
+    .str { color: var(--syn-string); }
+    .cm { color: var(--syn-comment); font-style: italic; }
+    .fn { color: var(--syn-func); }
+    .num { color: var(--syn-number); }
+    .cls { color: var(--syn-class); }
+    .op { color: var(--syn-keyword); }
+    .pr { color: var(--text-primary); }
+    .dc { color: var(--syn-py-decorator); }
+
+    /* === CARDS === */
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 24px;
+      transition: border-color 0.3s;
+    }
+    .info-card:hover { border-color: rgba(88,166,255,0.3); }
+    .info-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .info-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .cards-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+    /* === TABLE === */
+    .compare-table {
+      width: 100%; border-collapse: collapse; margin-top: 16px;
+      font-size: 14px;
+    }
+    .compare-table th {
+      padding: 12px 16px; text-align: left;
+      background: var(--bg-card-alt); color: var(--text-secondary);
+      font-weight: 600; font-size: 12px; text-transform: uppercase;
+      letter-spacing: 1px; border-bottom: 1px solid var(--border);
+    }
+    .compare-table td {
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .compare-table tr:hover td { background: rgba(88,166,255,0.03); }
+    .compare-table code {
+      font-family: 'JetBrains Mono', monospace; font-size: 13px;
+      background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;
+    }
+
+    /* === TAG LIST === */
+    .tag-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .tag {
+      padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* === FLOW === */
+    .flow-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 20px 0; }
+    .flow-box {
+      padding: 12px 22px; border-radius: 10px; font-size: 14px; font-weight: 600;
+      background: var(--bg-card); border: 1px solid var(--border);
+      text-align: center;
+    }
+    .flow-arrow { font-size: 22px; color: var(--text-muted); }
+
+    /* Crosshairs */
+    .crosshair {
+      position: absolute; color: rgba(88,166,255,0.12);
+      font-family: 'JetBrains Mono', monospace; font-size: 18px; pointer-events: none;
+    }
+    .cross-tl { top: 20px; left: 20px; }
+    .cross-tr { top: 20px; right: 20px; }
+    .cross-bl { bottom: 50px; left: 20px; }
+    .cross-br { bottom: 50px; right: 20px; }
+
+    /* === PORTADA === */
+    .hero-title {
+      font-size: clamp(42px, 6vw, 80px); font-weight: 900; line-height: 1.05;
+      letter-spacing: -2px;
+    }
+    .hero-title .cs-text {
+      background: linear-gradient(135deg, #9b4dca, #c084fc);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-title .vs-text { color: var(--text-muted); font-weight: 300; font-size: 0.5em; vertical-align: middle; }
+    .hero-title .py-text {
+      background: linear-gradient(135deg, #4da6ff, #38bdf8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-sub { font-size: 20px; color: var(--text-secondary); margin-top: 16px; font-weight: 300; line-height: 1.6; }
+    .hero-tags { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+    .hero-tag {
+      padding: 8px 18px; border-radius: 10px; font-size: 13px;
+      font-family: 'JetBrains Mono', monospace; font-weight: 500;
+    }
+    .hero-tag.cs { background: rgba(155,77,202,0.12); color: var(--accent-csharp-light); border: 1px solid rgba(155,77,202,0.2); }
+    .hero-tag.py { background: rgba(77,166,255,0.12); color: var(--accent-python-light); border: 1px solid rgba(77,166,255,0.2); }
+    .hero-tag.neutral { background: rgba(255,255,255,0.04); color: var(--text-secondary); border: 1px solid var(--border); }
+
+    /* === NOTE BOX === */
+    .note-box {
+      padding: 14px 20px; border-radius: 10px; font-size: 13px;
+      background: rgba(88,166,255,0.06); border-left: 3px solid var(--accent-cyan);
+      color: var(--text-secondary); line-height: 1.6; margin-top: 16px;
+    }
+    .note-box strong { color: var(--accent-cyan); }
+
+    /* Emphasis */
+    .em-csharp { color: var(--accent-csharp-light); font-weight: 600; }
+    .em-python { color: var(--accent-python-light); font-weight: 600; }
+    .em-green { color: var(--accent-green); }
+    .em-yellow { color: var(--accent-yellow); }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 900px) {
+      .code-compare { grid-template-columns: 1fr; }
+      .cards-grid-3 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .slide { padding: 30px 24px; }
+      .nav-arrow { width: 36px; height: 36px; font-size: 16px; opacity: 0.7; }
+      .nav-prev { left: 8px; }
+      .nav-next { right: 8px; }
+      .hero-title { letter-spacing: -1px; }
+      pre { font-size: 12px; padding: 12px 14px; }
+      .compare-table { font-size: 12px; }
+      .compare-table th, .compare-table td { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progressBar"></div>
+
+  <div class="slider" id="slider">
+
+    <!-- ==================== SLIDE 0: PORTADA ==================== -->
+    <div class="slide" id="slide-0">
+      <span class="crosshair cross-tl">+</span>
+      <span class="crosshair cross-tr">+</span>
+      <span class="crosshair cross-bl">+</span>
+      <span class="crosshair cross-br">+</span>
+      <div class="slide-content">
+        <span class="badge badge-section" style="margin-bottom:20px;">Guía Comparativa de Sintaxis</span>
+      </div>
+      <div class="slide-content">
+        <h1 class="hero-title">
+          <span class="cs-text">C#</span>
+          <span class="vs-text"> vs </span>
+          <span class="py-text">Python</span>
+        </h1>
+      </div>
+      <div class="slide-content">
+        <p class="hero-sub">Aprende cómo se traduce cada concepto fundamental entre<br>dos de los lenguajes más populares del mundo.</p>
+      </div>
+      <div class="slide-content">
+        <div class="hero-tags">
+          <span class="hero-tag cs">C# 12 / .NET 8</span>
+          <span class="hero-tag py">Python 3.12+</span>
+          <span class="hero-tag neutral">Tipado • OOP • Funcional</span>
+          <span class="hero-tag neutral">AECODE 2026</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 1: CONTEXTO ==================== -->
+    <div class="slide" id="slide-1">
+      <div class="slide-content">
+        <span class="badge badge-section">Contexto</span>
+      </div>
+      <div class="slide-content">
+        <h2 class="slide-title">¿Por qué compararlos?</h2>
+        <p class="slide-subtitle">C# y Python representan dos filosofías distintas de desarrollo. Conocer ambos amplía tu perspectiva como desarrollador.</p>
+      </div>
+      <div class="slide-content">
+        <div class="cards-grid" style="margin-top:8px;">
+          <div class="info-card" style="border-left: 3px solid var(--accent-csharp-light);">
+            <h3 style="color:var(--accent-csharp-light);">C# — Tipado estático</h3>
+            <p>Compilado, fuertemente tipado, orientado a objetos. Domina en desarrollo de escritorio (WPF), gaming (Unity), APIs (.NET) y aplicaciones empresariales.</p>
+          </div>
+          <div class="info-card" style="border-left: 3px solid var(--accent-python-light);">
+            <h3 style="color:var(--accent-python-light);">Python — Tipado dinámico</h3>
+            <p>Interpretado, tipado dinámico, multiparadigma. Domina en data science, IA/ML, automatización, scripting y educación por su sintaxis limpia.</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-content">
+        <div class="flow-row" style="margin-top:24px;">
+          <div class="flow-box" style="border-color:var(--accent-csharp-light);">Sintaxis explícita<br><small style="color:var(--text-muted)">C# → llaves, tipos, punto y coma</small></div>
+          <div class="flow-arrow">⟷</div>
+          <div class="flow-box" style="border-color:var(--accent-python-light);">Sintaxis concisa<br><small style="color:var(--text-muted)">Python → indentación, inferencia</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 2: ESTRUCTURA BÁSICA ==================== -->
+    <div class="slide" id="slide-2">
+      <div class="slide-content"><span class="badge badge-section">01 · Fundamentos</span></div>
+      <div class="slide-content">
+        <h2 class="slide-title">Estructura básica de un programa</h2>
+        <p class="slide-subtitle">El clásico "Hello World" y la estructura mínima de cada lenguaje.</p>
+      </div>
+      <div class="slide-content">
+        <div class="code-compare">
+          <div class="code-panel csharp">
+            <div class="code-panel-header"><span class="lang-icon">C#</span> Program.cs</div>
+<pre><code><span class="cm">// C# — Sintaxis completa</span>
+<span class="kw">using</span> System;
+
+<span class="kw">namespace</span> <span class="cls">MiApp</span>
+{
+    <span class="kw">class</span> <span class="cls">Program</span>
+    {
+        <span class="kw">static void</span> <span class="fn">Main</span>(<span class="tp">string</span>[] args)
+        {
+            Console.<span class="fn">WriteLine</span>(<span class="str">"Hola Mundo"</span>);
+        }
+    }
+}
+
+<span class="cm">// C# 12 — Top-level statements</span>
+Console.<span class="fn">WriteLine</span>(<span class="str">"Hola Mundo"</span>);</code></pre>
+          </div>
+          <div class="code-panel python">
+            <div class="code-panel-header"><span class="lang-icon">Py</span> main.py</div>
+<pre><code><span class="cm"># Python — Así de simple</span>
+<span class="fn">print</span>(<span class="str">"Hola Mundo"</span>)
+
+
+
+<span class="cm"># Con función main (buena práctica)</span>
+<span class="kw">def</span> <span class="fn">main</span>():
+    <span class="fn">print</span>(<span class="str">"Hola Mundo"</span>)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="fn">main</span>()</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="slide-content">
+        <div class="note-box"><strong>Nota:</strong> Desde C# 9, los <em>top-level statements</em> permiten escribir sin namespace/class, acercándose a la simplicidad de Python.</div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 3: VARIABLES Y TIPOS ==================== -->
+    <div class="slide" id="slide-3">
+      <div class="slide-content"><span class="badge badge-section">02 · Variables</span></div>
+      <div class="slide-content">
+        <h2 class="slide-title">Variables y tipos de datos</h2>
+      </div>
+      <div class="slide-content">
+        <div class="code-compare">
+          <div class="code-panel csharp">
+            <div class="code-panel-header"><span class="lang-icon">C#</span> Variables</div>
+<pre><code><span class="cm">// Tipado explícito</span>
+<span class="tp">int</span> edad = <span class="num">30</span>;
+<span class="tp">double</span> precio = <span class="num">19.99</span>;
+<span class="tp">string</span> nombre = <span class="str">"Marlon"</span>;
+<span class="tp">bool</span> activo = <span class="kw">true</span>;
+<span class="tp">char</span> letra = <span class="str">'A'</span>;
+
+<span class="cm">// Inferencia con var</span>
+<span class="kw">var</span> lista = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt;();
+<span class="kw">var</span> pi = <span class="num">3.14159</span>;
+
+<span class="cm">// Constantes</span>
+<span class="kw">const double</span> <span class="pr">GRAVITY</span> = <span class="num">9.81</span>;</code></pre>
+          </div>
+          <div class="code-panel python">
+            <div class="code-panel-header"><span class="lang-icon">Py</span> Variables</div>
+<pre><code><span class="cm"># Tipado dinámico</span>
+edad = <span class="num">30</span>
+precio = <span class="num">19.99</span>
+nombre = <span class="str">"Marlon"</span>
+activo = <span class="kw">True</span>
+letra = <span class="str">"A"</span>
+
+<span class="cm"># Type hints (opcional)</span>
+lista: <span class="tp">list</span>[<span class="tp">int</span>] = []
+pi: <span class="tp">float</span> = <span class="num">3.14159</span>
+
+<span class="cm"># Constante por convención</span>
+GRAVITY = <span class="num">9.81</span></code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="slide-content">
+        <div class="note-box"><strong>Clave:</strong> En C# los tipos se definen al compilar. En Python son dinámicos, aunque <em>type hints</em> ayudan a la legibilidad y herramientas como <code>mypy</code>.</div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 4: CONDICIONALES ==================== -->
+    <div class="slide" id="slide-4">
+      <div class="slide-content"><span class="badge badge-section">03 · Control de flujo</span></div>
+      <div class="slide-content">
+        <h2 class="slide-title">Condicionales</h2>
+      </div>
+      <div class="slide-content">
+        <div class="code-compare">
+          <div class="code-panel csharp">
+            <div class="code-panel-header"><span class="lang-icon">C#</span> if / switch</div>
+<pre><code><span class="cm">// If-else</span>
+<span class="kw">if</span> (edad >= <span class="num">18</span>)
+{
+    Console.<span class="fn">WriteLine</span>(<span class="str">"Mayor"</span>);
+}
+<span class="kw">else if</span> (edad >= <span class="num">13</span>)
+{
+    Console.<span class="fn">WriteLine</span>(<span class="str">"Adolescente"</span>);
+}
+<span class="kw">else</span>
+{
+    Console.<span class="fn">WriteLine</span>(<span class="str">"Niño"</span>);
+}
+
+<span class="cm">// Ternario</span>
+<span class="kw">var</span> estado = edad >= <span class="num">18</span> ? <span class="str">"Mayor"</span> : <span class="str">"Menor"</span>;
+
+<span class="cm">// Switch expression (C# 8+)</span>
+<span class="kw">var</span> msg = edad <span class="kw">switch</span>
+{
+    >= <span class="num">18</span> => <span class="str">"Adulto"</span>,
+    >= <span class="num">13</span> => <span class="str">"Teen"</span>,
+    _     => <span class="str">"Niño"</span>
+};</code></pre>
+          </div>
+          <div class="code-panel python">
+            <div class="code-panel-header"><span class="lang-icon">Py</span> if / match</div>
+<pre><code><span class="cm"># If-elif-else</span>
+<span class="kw">if</span> edad >= <span class="num">18</span>:
+    <span class="fn">print</span>(<span class="str">"Mayor"</span>)
+<span class="kw">elif</span> edad >= <span class="num">13</span>:
+    <span class="fn">print</span>(<span class="str">"Adolescente"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"Niño"</span>)
+
+
+
+<span class="cm"># Ternario</span>
+estado = <span class="str">"Mayor"</span> <span class="kw">if</span> edad >= <span class="num">18</span> <span class="kw">else</span> <span class="str">"Menor"</span>
+
+<span class="cm"># Match-case (Python 3.10+)</span>
+<span class="kw">match</span> edad:
+    <span class="kw">case</span> n <span class="kw">if</span> n >= <span class="num">18</span>:
+        msg = <span class="str">"Adulto"</span>
+    <span class="kw">case</span> n <span class="kw">if</span> n >= <span class="num">13</span>:
+        msg = <span class="str">"Teen"</span>
+    <span class="kw">case</span> _:
+        msg = <span class="str">"Niño"</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 5: BUCLES ==================== -->
+    <div class="slide" id="slide-5">
+      <div class="slide-content"><span class="badge badge-section">04 · Bucles</span></div>
+      <div class="slide-content">
+        <h2 class="slide-title">Iteración: for, while, foreach</h2>
+      </div>
+      <div class="slide-content">
+        <div class="code-compare">
+          <div class="code-panel csharp">
+            <div class="code-panel-header"><span class="lang-icon">C#</span> Bucles</div>
+<pre><code><span class="cm">// For clásico</span>
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">0</span>; i < <span class="num">5</span>; i++)
+{
+    Console.<span class="fn">WriteLine</span>(i);
+}
+
+<span class="cm">// Foreach</span>
+<span class="tp">var</span> frutas = <span class="kw">new</span>[] { <span class="str">"🍎"</span>, <span class="str">"🍌"</span>, <span class="str">"🍇"</span> };
+<span class="kw">foreach</span> (<span class="kw">var</span> f <span class="kw">in</span> frutas)
+{
+    Console.<span class="fn">WriteLine</span>(f);
+}
+
+<span class="cm">// While</span>
+<span class="tp">int</span> n = <span class="num">0</span>;
+<span class="kw">while</span> (n < <span class="num">3</span>)
+{
+    Console.<span class="fn">WriteLine</span>(n++);
+}</code></pre>
+          </div>
+          <div class="code-panel python">
+            <div class="code-panel-header"><span class="lang-icon">Py</span> Bucles</div>
+<pre><code><span class="cm"># For con range</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>):
+    <span class="fn">print</span>(i)
+
+
+<span class="cm"># For sobre colección</span>
+frutas = [<span class="str">"🍎"</span>, <span class="str">"🍌"</span>, <span class="str">"🍇"</span>]
+<span class="kw">for</span> f <span class="kw">in</span> frutas:
+    <span class="fn">print</span>(f)
+
+
+<span class="cm"># While</span>
+n = <span class="num">0</span>
+<span class="kw">while</span> n < <span class="num">3</span>:
+    <span class="fn">print</span>(n)
+    n += <span class="num">1</span></code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="slide-content">
+        <div class="note-box"><strong>Diferencia clave:</strong> C# usa <code>foreach...in</code> para iterar colecciones; Python simplemente usa <code>for...in</code> para todo. Python no tiene un for clásico con <code>i++</code>.</div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 6: FUNCIONES ==================== -->
+    <div class="slide" id="slide-6">
+      <div class="slide-content"><span class="badge badge-section">05 · Funciones</span></div>
+      <div class="slide-content">
+        <h2 class="slide-title">Funciones y métodos</h2>
+      </div>
+      <div class="slide-content">
+        <div class="code-compare">
+          <div class="code-panel csharp">
+            <div class="code-panel-header"><span class="lang-icon">C#</span> Métodos</div>
+<pre><code><span class="cm">// Método con tipo de retorno</span>
+<span class="kw">static</span> <span class="tp">double</span> <span class="fn">Sumar</span>(<span class="tp">double</span> a, <span class="tp">double</span> b)
+{
+    <span class="kw">return</span> a + b;
+}
+
+<span class="cm">// Método void</span>
+<span class="kw">static void</span> <span class="fn">Saludar</span>(<span class="tp">string</span> nombre)
+{
+    Console.<span class="fn">WriteLine</span>(<span class="str">$"Hola {nombre}"</span>);
+}
+
+<span class="cm">// Parámetro opcional</span>
+<span class="kw">static void</span> <span class="fn">Log</span>(<span class="tp">string</span> msg, <span class="tp">int</span> nivel = <span class="num">1</span>)
+{
+    Console.<span class="fn">WriteLine</span>(<span class="str">$"[{nivel}] {msg}"</span>);
+}
+
+<span class="cm">// Expression body (arrow)</span>
+<span class="kw">static</span> <span class="tp">int</span> <span class="fn">Doble</span>(<span class="tp">int</span> x) => x * <span class="num">2</span>;</code></pre>
+          </div>
+          <div class="code-panel python">
+            <div class="code-panel-header"><span class="lang-icon">Py</span> Funciones</div>
+<pre><code><span class="cm"># Función con retorno</span>
+<span class="kw">def</span> <span class="fn">sumar</span>(a: <span class="tp">float</span>, b: <span class="tp">float</span>) -> <span class="tp">float</span>:
+    <span class="kw">return</span> a + b
+
+
+<span class="cm"># Función sin retorno explícito</span>
+<span class="kw">def</span> <span class="fn">saludar</span>(nombre: <span class="tp">str</span>):
+    <span class="fn">print</span>(<span class="str">f"Hola {nombre}"</span>)
+
+
+<span class="cm"># Parámetro opcional</span>
+<span class="kw">def</span> <span class="fn">log</span>(msg: <span class="tp">str</span>, nivel: <span class="tp">int</span> = <span class="num">1</span>):
+    <span class="fn">print</span>(<span class="str">f"[{nivel}] {msg}"</span>)
+
+
+<span class="cm"># Lambda</span>
+doble = <span class="kw">lambda</span> x: x * <span class="num">2</span></code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="slide-content">
+        <div class="note-box"><strong>Equivalencia:</strong> Las <em>expression-bodied</em> members de C# (<code>=></code>) son análogos a las <code>lambda</code> de Python, pero en C# se usan dentro de clases como métodos completos.</div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 7: CLASES ==================== -->
+    <div class="slide" id="slide-7">
+      <div class="slide-content"><span class="badge badge-section">06 · OOP</span></div>
+      <div class="slide-content">
+        <h2 class="slide-title">Clases y objetos</h2>
+      </div>
+      <div class="slide-content">
+        <div class="code-compare">
+          <div class="code-panel csharp">
+            <div class="code-panel-header"><span class="lang-icon">C#</span> Clases</div>
+<pre><code><span class="kw">public class</span> <span class="cls">Persona</span>
+{
+    <span class="cm">// Propiedades</span>
+    <span class="kw">public</span> <span class="tp">string</span> Nombre { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="tp">int</span> Edad { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="cm">// Constructor</span>
+    <span class="kw">public</span> <span class="fn">Persona</span>(<span class="tp">string</span> nombre, <span class="tp">int</span> edad)
+    {
+        Nombre = nombre;
+        Edad = edad;
+    }
+
+    <span class="cm">// Método</span>
+    <span class="kw">public</span> <span class="tp">string</span> <span class="fn">Presentarse</span>()
+        => <span class="str">$"Soy {Nombre}, {Edad} años"</span>;
+}
+
+<span class="cm">// Uso</span>
+<span class="kw">var</span> p = <span class="kw">new</span> <span class="cls">Persona</span>(<span class="str">"Ana"</span>, <span class="num">25</span>);
+Console.<span class="fn">WriteLine</span>(p.<span class="fn">Presentarse</span>());</code></pre>
+          </div>
+          <div class="code-panel python">
+            <div class="code-panel-header"><span class="lang-icon">Py</span> Clases</div>
+<pre><code><span class="kw">class</span> <span class="cls">Persona</span>:
+    <span class="cm"># Constructor</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, nombre: <span class="tp">str</span>, edad: <span class="tp">int</span>):
+        self.nombre = nombre
+        self.edad = edad
+
+
+
+    <span class="cm"># Método</span>
+    <span class="kw">def</span> <span class="fn">presentarse</span>(self) -> <span class="tp">str</span>:
+        <span class="kw">return</span> <span class="str">f"Soy {self.nombre}, {self.edad} años"</span>
+
+
+
+<span class="cm"># Uso</span>
+p = <span class="cls">Persona</span>(<span class="str">"Ana"</span>, <span class="num">25</span>)
+<span class="fn">print</span>(p.<span class="fn">presentarse</span>())</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="slide-content">
+        <div class="note-box"><strong>Diferencia clave:</strong> C# usa <code>propiedades</code> con getters/setters automáticos. Python usa atributos directos + <code>@property</code> si necesitas control. Python siempre pasa <code>self</code> explícitamente.</div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 8: HERENCIA ==================== -->
+    <div class="slide" id="slide-8">
+      <div class="slide-content"><span class="badge badge-section">07 · Herencia</span></div>
+      <div class="slide-content">
+        <h2 class="slide-title">Herencia e interfaces</h2>
+      </div>
+      <div class="slide-content">
+        <div class="code-compare">
+          <div class="code-panel csharp">
+            <div class="code-panel-header"><span class="lang-icon">C#</span> Herencia</div>
+<pre><code><span class="cm">// Interfaz</span>
+<span class="kw">public interface</span> <span class="cls">IMovible</span>
+{
+    <span class="kw">void</span> <span class="fn">Mover</span>(<span class="tp">double</span> dx, <span class="tp">double</span> dy);
+}
+
+<span class="cm">// Clase base</span>
+<span class="kw">public class</span> <span class="cls">Forma</span>
+{
+    <span class="kw">public virtual</span> <span class="tp">double</span> <span class="fn">Area</span>()
+        => <span class="num">0</span>;
+}
+
+<span class="cm">// Herencia + interfaz</span>
+<span class="kw">public class</span> <span class="cls">Circulo</span> : <span class="cls">Forma</span>, <span class="cls">IMovible</span>
+{
+    <span class="kw">public</span> <span class="tp">double</span> Radio { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public override</span> <span class="tp">double</span> <span class="fn">Area</span>()
+        => Math.PI * Radio * Radio;
+
+    <span class="kw">public void</span> <span class="fn">Mover</span>(<span class="tp">double</span> dx, <span class="tp">double</span> dy)
+        => Console.<span class="fn">WriteLine</span>(<span class="str">$"Moviendo {dx},{dy}"</span>);
+}</code></pre>
+          </div>
+          <div class="code-panel python">
+            <div class="code-panel-header"><span class="lang-icon">Py</span> Herencia</div>
+<pre><code><span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+<span class="kw">import</span> math
+
+<span class="cm"># Clase abstracta (interfaz)</span>
+<span class="kw">class</span> <span class="cls">Movible</span>(ABC):
+    <span class="dc">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">mover</span>(self, dx: <span class="tp">float</span>, dy: <span class="tp">float</span>): ...
+
+<span class="cm"># Clase base</span>
+<span class="kw">class</span> <span class="cls">Forma</span>:
+    <span class="kw">def</span> <span class="fn">area</span>(self) -> <span class="tp">float</span>:
+        <span class="kw">return</span> <span class="num">0</span>
+
+<span class="cm"># Herencia múltiple</span>
+<span class="kw">class</span> <span class="cls">Circulo</span>(<span class="cls">Forma</span>, <span class="cls">Movible</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, radio: <span class="tp">float</span>):
+        self.radio = radio
+
+    <span class="kw">def</span> <span class="fn">area</span>(self) -> <span class="tp">float</span>:
+        <span class="kw">return</span> math.pi * self.radio ** <span class="num">2</span>
+
+    <span class="kw">def</span> <span class="fn">mover</span>(self, dx: <span class="tp">float</span>, dy: <span class="tp">float</span>):
+        <span class="fn">print</span>(<span class="str">f"Moviendo {dx},{dy}"</span>)</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 9: COLECCIONES ==================== -->
+    <div class="slide" id="slide-9">
+      <div class="slide-content"><span class="badge badge-section">08 · Colecciones</span></div>
+      <div class="slide-content">
+        <h2 class="slide-title">Listas, diccionarios y arrays</h2>
+      </div>
+      <div class="slide-content">
+        <div class="code-compare">
+          <div class="code-panel csharp">
+            <div class="code-panel-header"><span class="lang-icon">C#</span> Colecciones</div>
+<pre><code><span class="cm">// Array</span>
+<span class="tp">int</span>[] nums = { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span> };
+
+<span class="cm">// List</span>
+<span class="kw">var</span> lista = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">string</span>&gt;
+  { <span class="str">"a"</span>, <span class="str">"b"</span>, <span class="str">"c"</span> };
+lista.<span class="fn">Add</span>(<span class="str">"d"</span>);
+
+<span class="cm">// Dictionary</span>
+<span class="kw">var</span> edades = <span class="kw">new</span> <span class="tp">Dictionary</span>&lt;<span class="tp">string</span>, <span class="tp">int</span>&gt;
+{
+    [<span class="str">"Ana"</span>] = <span class="num">25</span>,
+    [<span class="str">"Luis"</span>] = <span class="num">30</span>
+};
+
+<span class="cm">// Acceso</span>
+<span class="kw">var</span> edad = edades[<span class="str">"Ana"</span>];</code></pre>
+          </div>
+          <div class="code-panel python">
+            <div class="code-panel-header"><span class="lang-icon">Py</span> Colecciones</div>
+<pre><code><span class="cm"># Lista (mutable)</span>
+nums = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
+
+<span class="cm"># Lista</span>
+lista = [<span class="str">"a"</span>, <span class="str">"b"</span>, <span class="str">"c"</span>]
+lista.<span class="fn">append</span>(<span class="str">"d"</span>)
+
+<span class="cm"># Diccionario</span>
+edades = {
+    <span class="str">"Ana"</span>: <span class="num">25</span>,
+    <span class="str">"Luis"</span>: <span class="num">30</span>
+}
+
+<span class="cm"># Acceso</span>
+edad = edades[<span class="str">"Ana"</span>]
+<span class="cm"># Seguro: edades.get("Ana", 0)</span></code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="slide-content">
+        <div class="note-box"><strong>Tip:</strong> En C#, <code>List&lt;T&gt;</code> es genérico y tipado. En Python, las listas aceptan cualquier tipo mezclado (aunque se recomienda <code>list[int]</code> con type hints).</div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 10: LINQ vs COMPREHENSIONS ==================== -->
+    <div class="slide" id="slide-10">
+      <div class="slide-content"><span class="badge badge-section">09 · Queries</span></div>
+      <div class="slide-content">
+        <h2 class="slide-title">LINQ vs List Comprehensions</h2>
+        <p class="slide-subtitle">Uno de los puntos más poderosos de cada lenguaje: transformar y consultar datos.</p>
+      </div>
+      <div class="slide-content">
+        <div class="code-compare">
+          <div class="code-panel csharp">
+            <div class="code-panel-header"><span class="lang-icon">C#</span> LINQ</div>
+<pre><code><span class="kw">var</span> numeros = <span class="kw">new</span>[] { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>, <span class="num">7</span>, <span class="num">8</span> };
+
+<span class="cm">// Filtrar pares</span>
+<span class="kw">var</span> pares = numeros
+    .<span class="fn">Where</span>(n => n % <span class="num">2</span> == <span class="num">0</span>)
+    .<span class="fn">ToList</span>();
+
+<span class="cm">// Transformar</span>
+<span class="kw">var</span> cuadrados = numeros
+    .<span class="fn">Select</span>(n => n * n)
+    .<span class="fn">ToList</span>();
+
+<span class="cm">// Encadenar operaciones</span>
+<span class="kw">var</span> resultado = numeros
+    .<span class="fn">Where</span>(n => n > <span class="num">3</span>)
+    .<span class="fn">Select</span>(n => n * <span class="num">2</span>)
+    .<span class="fn">OrderByDescending</span>(n => n)
+    .<span class="fn">Take</span>(<span class="num">3</span>)
+    .<span class="fn">ToList</span>();</code></pre>
+          </div>
+          <div class="code-panel python">
+            <div class="code-panel-header"><span class="lang-icon">Py</span> Comprehensions</div>
+<pre><code>numeros = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>, <span class="num">7</span>, <span class="num">8</span>]
+
+<span class="cm"># Filtrar pares</span>
+pares = [n <span class="kw">for</span> n <span class="kw">in</span> numeros
+         <span class="kw">if</span> n % <span class="num">2</span> == <span class="num">0</span>]
+
+<span class="cm"># Transformar</span>
+cuadrados = [n * n
+             <span class="kw">for</span> n <span class="kw">in</span> numeros]
+
+<span class="cm"># Encadenar operaciones</span>
+resultado = <span class="fn">sorted</span>(
+    [n * <span class="num">2</span> <span class="kw">for</span> n <span class="kw">in</span> numeros <span class="kw">if</span> n > <span class="num">3</span>],
+    reverse=<span class="kw">True</span>
+)[:<span class="num">3</span>]</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="slide-content">
+        <div class="note-box"><strong>Equivalencia:</strong> <code>.Where()</code> ≈ <code>if</code> en comprehension | <code>.Select()</code> ≈ expresión del comprehension | <code>.OrderBy()</code> ≈ <code>sorted()</code> | <code>.Take(n)</code> ≈ slicing <code>[:n]</code></div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 11: MANEJO DE ERRORES ==================== -->
+    <div class="slide" id="slide-11">
+      <div class="slide-content"><span class="badge badge-section">10 · Errores</span></div>
+      <div class="slide-content">
+        <h2 class="slide-title">Manejo de excepciones</h2>
+      </div>
+      <div class="slide-content">
+        <div class="code-compare">
+          <div class="code-panel csharp">
+            <div class="code-panel-header"><span class="lang-icon">C#</span> try-catch</div>
+<pre><code><span class="kw">try</span>
+{
+    <span class="kw">var</span> resultado = <span class="num">10</span> / <span class="num">0</span>;
+}
+<span class="kw">catch</span> (<span class="tp">DivideByZeroException</span> ex)
+{
+    Console.<span class="fn">WriteLine</span>(
+      <span class="str">$"Error: {ex.Message}"</span>);
+}
+<span class="kw">catch</span> (<span class="tp">Exception</span> ex)
+{
+    Console.<span class="fn">WriteLine</span>(
+      <span class="str">$"General: {ex.Message}"</span>);
+}
+<span class="kw">finally</span>
+{
+    Console.<span class="fn">WriteLine</span>(<span class="str">"Fin"</span>);
+}
+
+<span class="cm">// Lanzar excepción</span>
+<span class="kw">throw new</span> <span class="tp">ArgumentException</span>(<span class="str">"Inválido"</span>);</code></pre>
+          </div>
+          <div class="code-panel python">
+            <div class="code-panel-header"><span class="lang-icon">Py</span> try-except</div>
+<pre><code><span class="kw">try</span>:
+    resultado = <span class="num">10</span> / <span class="num">0</span>
+
+<span class="kw">except</span> <span class="tp">ZeroDivisionError</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="str">f"Error: {e}"</span>)
+
+<span class="kw">except</span> <span class="tp">Exception</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="str">f"General: {e}"</span>)
+
+<span class="kw">finally</span>:
+    <span class="fn">print</span>(<span class="str">"Fin"</span>)
+
+
+
+
+<span class="cm"># Lanzar excepción</span>
+<span class="kw">raise</span> <span class="tp">ValueError</span>(<span class="str">"Inválido"</span>)</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="slide-content">
+        <div class="note-box"><strong>Mapeo:</strong> <code>catch</code> → <code>except</code> | <code>throw</code> → <code>raise</code> | <code>finally</code> = igual en ambos | C# usa <code>new</code> para crear excepciones, Python no.</div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 12: ASYNC ==================== -->
+    <div class="slide" id="slide-12">
+      <div class="slide-content"><span class="badge badge-section">11 · Async</span></div>
+      <div class="slide-content">
+        <h2 class="slide-title">Programación asíncrona</h2>
+      </div>
+      <div class="slide-content">
+        <div class="code-compare">
+          <div class="code-panel csharp">
+            <div class="code-panel-header"><span class="lang-icon">C#</span> async/await</div>
+<pre><code><span class="kw">using</span> System.Net.Http;
+
+<span class="kw">static async</span> <span class="tp">Task</span>&lt;<span class="tp">string</span>&gt; <span class="fn">FetchData</span>(
+    <span class="tp">string</span> url)
+{
+    <span class="kw">using var</span> client = <span class="kw">new</span> <span class="tp">HttpClient</span>();
+    <span class="kw">var</span> response = <span class="kw">await</span> client
+        .<span class="fn">GetStringAsync</span>(url);
+    <span class="kw">return</span> response;
+}
+
+<span class="cm">// Llamada</span>
+<span class="kw">var</span> data = <span class="kw">await</span> <span class="fn">FetchData</span>(
+    <span class="str">"https://api.example.com"</span>);
+
+<span class="cm">// Múltiples tareas paralelas</span>
+<span class="kw">var</span> tasks = urls.<span class="fn">Select</span>(
+    u => <span class="fn">FetchData</span>(u));
+<span class="kw">var</span> results = <span class="kw">await</span> Task
+    .<span class="fn">WhenAll</span>(tasks);</code></pre>
+          </div>
+          <div class="code-panel python">
+            <div class="code-panel-header"><span class="lang-icon">Py</span> async/await</div>
+<pre><code><span class="kw">import</span> aiohttp
+<span class="kw">import</span> asyncio
+
+<span class="kw">async def</span> <span class="fn">fetch_data</span>(
+    url: <span class="tp">str</span>) -> <span class="tp">str</span>:
+    <span class="kw">async with</span> aiohttp.<span class="cls">ClientSession</span>() <span class="kw">as</span> s:
+        <span class="kw">async with</span> s.<span class="fn">get</span>(url) <span class="kw">as</span> resp:
+            <span class="kw">return await</span> resp.<span class="fn">text</span>()
+
+<span class="cm"># Llamada</span>
+data = <span class="kw">await</span> <span class="fn">fetch_data</span>(
+    <span class="str">"https://api.example.com"</span>)
+
+<span class="cm"># Múltiples tareas paralelas</span>
+tasks = [<span class="fn">fetch_data</span>(u)
+         <span class="kw">for</span> u <span class="kw">in</span> urls]
+results = <span class="kw">await</span> asyncio.<span class="fn">gather</span>(
+    *tasks)</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="slide-content">
+        <div class="note-box"><strong>Paralelo:</strong> <code>Task.WhenAll()</code> en C# ≈ <code>asyncio.gather()</code> en Python. Ambos retornan cuando todas las tareas terminan. C# usa <code>Task&lt;T&gt;</code>, Python usa coroutines.</div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 13: STRING INTERPOLATION ==================== -->
+    <div class="slide" id="slide-13">
+      <div class="slide-content"><span class="badge badge-section">12 · Strings</span></div>
+      <div class="slide-content">
+        <h2 class="slide-title">Interpolación y formateo de strings</h2>
+      </div>
+      <div class="slide-content">
+        <div class="code-compare">
+          <div class="code-panel csharp">
+            <div class="code-panel-header"><span class="lang-icon">C#</span> Strings</div>
+<pre><code><span class="tp">string</span> nombre = <span class="str">"Marlon"</span>;
+<span class="tp">int</span> edad = <span class="num">28</span>;
+
+<span class="cm">// Interpolación ($)</span>
+<span class="kw">var</span> msg = <span class="str">$"Hola {nombre}, tienes {edad}"</span>;
+
+<span class="cm">// Multilínea (raw string C# 11+)</span>
+<span class="kw">var</span> json = <span class="str">$"""
+    {{
+        "nombre": "{nombre}",
+        "edad": {edad}
+    }}
+    """</span>;
+
+<span class="cm">// String.Format (legacy)</span>
+<span class="kw">var</span> old = <span class="tp">String</span>.<span class="fn">Format</span>(
+    <span class="str">"Hola {0}, tienes {1}"</span>,
+    nombre, edad);
+
+<span class="cm">// Verbatim + interpolación</span>
+<span class="kw">var</span> path = <span class="str">@$"C:\Users\{nombre}"</span>;</code></pre>
+          </div>
+          <div class="code-panel python">
+            <div class="code-panel-header"><span class="lang-icon">Py</span> Strings</div>
+<pre><code>nombre = <span class="str">"Marlon"</span>
+edad = <span class="num">28</span>
+
+<span class="cm"># f-strings</span>
+msg = <span class="str">f"Hola {nombre}, tienes {edad}"</span>
+
+<span class="cm"># Multilínea</span>
+json = <span class="str">f"""
+    {{
+        "nombre": "{nombre}",
+        "edad": {edad}
+    }}
+    """</span>
+
+<span class="cm"># .format() (legacy)</span>
+old = <span class="str">"Hola {}, tienes {}"</span>.<span class="fn">format</span>(
+    nombre, edad)
+
+<span class="cm"># Raw string</span>
+path = <span class="str">rf"C:\Users\{nombre}"</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 14: TABLA RESUMEN ==================== -->
+    <div class="slide" id="slide-14">
+      <div class="slide-content"><span class="badge badge-green">Resumen</span></div>
+      <div class="slide-content">
+        <h2 class="slide-title">Tabla de equivalencias rápida</h2>
+        <p class="slide-subtitle">Referencia rápida de las equivalencias clave entre C# y Python.</p>
+      </div>
+      <div class="slide-content">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th style="width:28%">Concepto</th>
+              <th style="width:36%"><span class="em-csharp">C#</span></th>
+              <th style="width:36%"><span class="em-python">Python</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Declarar variable</td><td><code>int x = 5;</code></td><td><code>x = 5</code></td></tr>
+            <tr><td>Imprimir</td><td><code>Console.WriteLine()</code></td><td><code>print()</code></td></tr>
+            <tr><td>Condicional</td><td><code>if () { }</code></td><td><code>if :</code></td></tr>
+            <tr><td>Bucle for</td><td><code>for (int i=0; i&lt;n; i++)</code></td><td><code>for i in range(n):</code></td></tr>
+            <tr><td>Foreach</td><td><code>foreach (var x in col)</code></td><td><code>for x in col:</code></td></tr>
+            <tr><td>Función</td><td><code>int Fn(int x) { }</code></td><td><code>def fn(x: int) -> int:</code></td></tr>
+            <tr><td>Clase</td><td><code>class C { }</code></td><td><code>class C:</code></td></tr>
+            <tr><td>Constructor</td><td><code>public C() { }</code></td><td><code>def __init__(self):</code></td></tr>
+            <tr><td>Herencia</td><td><code>class B : A { }</code></td><td><code>class B(A):</code></td></tr>
+            <tr><td>Null / None</td><td><code>null</code></td><td><code>None</code></td></tr>
+            <tr><td>Excepción</td><td><code>throw new Ex()</code></td><td><code>raise Ex()</code></td></tr>
+            <tr><td>Async</td><td><code>async Task&lt;T&gt; Fn()</code></td><td><code>async def fn():</code></td></tr>
+            <tr><td>Lambda</td><td><code>x => x * 2</code></td><td><code>lambda x: x * 2</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== SLIDE 15: CIERRE ==================== -->
+    <div class="slide" id="slide-15">
+      <span class="crosshair cross-tl">+</span>
+      <span class="crosshair cross-tr">+</span>
+      <span class="crosshair cross-bl">+</span>
+      <span class="crosshair cross-br">+</span>
+      <div class="slide-content" style="text-align:center;">
+        <span class="badge badge-section" style="margin-bottom:20px;">Conclusión</span>
+      </div>
+      <div class="slide-content" style="text-align:center;">
+        <h2 class="slide-title" style="font-size:clamp(32px,4.5vw,56px); max-width:800px; margin:0 auto;">Dos lenguajes, una lógica</h2>
+        <p class="slide-subtitle" style="max-width:600px; margin:16px auto 32px;">Los conceptos fundamentales son los mismos. Lo que cambia es la sintaxis y las convenciones. Aprender uno hace más fácil dominar el otro.</p>
+      </div>
+      <div class="slide-content" style="text-align:center;">
+        <div class="cards-grid-3" style="max-width:750px; margin:0 auto;">
+          <div class="info-card" style="text-align:center; border-top:3px solid var(--accent-csharp-light);">
+            <h3 style="color:var(--accent-csharp-light); font-size:20px;">C#</h3>
+            <p>Explícito, seguro, enterprise-ready. Ideal para aplicaciones robustas y Revit API.</p>
+          </div>
+          <div class="info-card" style="text-align:center; border-top:3px solid var(--accent-green);">
+            <h3 style="color:var(--accent-green); font-size:20px;">Ambos</h3>
+            <p>OOP, async/await, excepciones, LINQ ↔ comprehensions. La lógica trasciende.</p>
+          </div>
+          <div class="info-card" style="text-align:center; border-top:3px solid var(--accent-python-light);">
+            <h3 style="color:var(--accent-python-light); font-size:20px;">Python</h3>
+            <p>Conciso, flexible, rápido de prototipar. Ideal para scripting y automatización AEC.</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-content" style="text-align:center; margin-top:32px;">
+        <div class="tag-list" style="justify-content:center;">
+          <span class="tag">Practica con proyectos reales</span>
+          <span class="tag">Lee código ajeno</span>
+          <span class="tag">Usa la documentación oficial</span>
+        </div>
+        <p style="margin-top:24px; color:var(--text-muted); font-size:14px; font-family:'JetBrains Mono', monospace;">AECODE · 2026 · Presiona <kbd style="background:var(--bg-card); padding:2px 8px; border-radius:4px; border:1px solid var(--border);">F</kbd> para pantalla completa</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NAVIGATION -->
+  <button class="nav-arrow nav-prev" id="prevBtn">‹</button>
+  <button class="nav-arrow nav-next" id="nextBtn">›</button>
+  <div class="dots" id="dots"></div>
+  <div class="page-number" id="pageNumber"></div>
+
+  <script>
+    const slider = document.getElementById('slider');
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.getElementById('dots');
+    const progressBar = document.getElementById('progressBar');
+    const pageNumber = document.getElementById('pageNumber');
+    let current = 0;
+    const total = slides.length;
+
+    slides.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.onclick = () => goTo(i);
+      dots.appendChild(dot);
+    });
+
+    function goTo(n) {
+      current = Math.max(0, Math.min(n, total - 1));
+      slider.style.transform = `translateX(-${current * 100}vw)`;
+      document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+      progressBar.style.width = `${((current + 1) / total) * 100}%`;
+      pageNumber.textContent = `${current + 1} / ${total}`;
+      slides.forEach((s, i) => s.classList.toggle('active', i === current));
+    }
+
+    document.getElementById('prevBtn').onclick = () => goTo(current - 1);
+    document.getElementById('nextBtn').onclick = () => goTo(current + 1);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+      if (e.key === 'ArrowLeft') goTo(current - 1);
+      if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+      }
+    });
+
+    // Touch/swipe
+    let touchStartX = 0, touchStartY = 0;
+    slider.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    slider.addEventListener('touchend', e => {
+      const diffX = touchStartX - e.changedTouches[0].clientX;
+      const diffY = touchStartY - e.changedTouches[0].clientY;
+      if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+        goTo(current + (diffX > 0 ? 1 : -1));
+      }
+    }, { passive: true });
+
+    goTo(0);
+  </script>
+</body>
+</html>
